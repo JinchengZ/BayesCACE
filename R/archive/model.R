@@ -1,7 +1,7 @@
-model.full <- function(prior.type="diffuse", delta.u=T, delta.v=T, 
+model.full <- function(prior.type="default", delta.u=T, delta.v=T, 
                        delta.n=T, delta.a=T, delta.s=T, delta.b=T, pho=T){
   
-  if(prior.type=="diffuse" & delta.u & delta.v & 
+  if(prior.type=="default" & delta.u & delta.v & 
      delta.n & delta.a & delta.s & delta.b & pho){
     modelstring<-"model{
   for (i in 1:I) {
@@ -18,23 +18,26 @@ model.full <- function(prior.type="diffuse", delta.u=T, delta.v=T,
     R[i, 1:4] ~ dmulti(prob[i, 1:4], N0[i])
     R[i, 5:8] ~ dmulti(prob[i, 5:8], N1[i])
     
-    probit(u1[i]) <- alpha.u + delta.u[i]
-    delta.u[i] ~ dnorm(0, tau.u)
-    probit(v1[i]) <- alpha.v + delta.v[i]
-    delta.v[i] ~ dnorm(0, tau.v)
-    
-    n[i] <- alpha.n + delta.n[i]
+    n[i] <- alpha.n + Ind[1]*delta.n[i]
     delta.n[i] ~ dnorm(0, tau.n)
-    a[i] <- alpha.a + delta.a[i]
+    a[i] <- alpha.a + Ind[2]*delta.a[i]
     delta.a[i] ~ dnorm(0, tau.a)
     pi_n[i] <- exp(n[i])/(1+exp(n[i])+exp(a[i]))
     pi_a[i] <- exp(a[i])/(1+exp(n[i])+exp(a[i]))
     pi_c[i] <- 1-pi_a[i]-pi_n[i]
     
-    logit(s1[i]) <- alpha.s1 + delta.s[i]
+    probit(u1[i]) <- alpha.u + Ind[3]*delta.u[i]
+    delta.u[i] ~ dnorm(0, tau.u)
+    probit(v1[i]) <- alpha.v + Ind[4]*delta.v[i]
+    delta.v[i] ~ dnorm(0, tau.v)
+
+    
+    logit(s1[i]) <- alpha.s1 + Ind[5]*delta.s[i]
     delta.s[i] ~ dnorm(0, tau.s)
-    logit(b1[i]) <- alpha.b1 + delta.b[i]
+    logit(b1[i]) <- alpha.b1 + Ind[6]*delta.b[i]
     delta.b[i] ~ dnorm(0, tau.b)
+
+    cacei[i] <- u1[i]-v1[i]
   } 
     
     CACE <- phi(alpha.u/sqrt(1+sigma.u^2))-phi(alpha.v/sqrt(1+sigma.v^2))
@@ -44,8 +47,8 @@ model.full <- function(prior.type="diffuse", delta.u=T, delta.v=T,
     pic <- 1-pia-pin
     u1out <- phi(alpha.u/sqrt(1+sigma.u^2))
     v1out <- phi(alpha.v/sqrt(1+sigma.v^2))
-    s1out <- ilogit(alpha.s1)
-    b1out <- ilogit(alpha.b1)
+    s1out <- ilogit(alpha.s1/sqrt(1 + (16^2*3/(15^2*pi^2))*sigma.s^2))
+    b1out <- ilogit(alpha.b1/sqrt(1 + (16^2*3/(15^2*pi^2))*sigma.b^2))
     
     # priors
     alpha.n ~  dnorm(0, 0.16)
@@ -71,7 +74,7 @@ model.full <- function(prior.type="diffuse", delta.u=T, delta.v=T,
 } "
   }
 
-  if(!is.element(prior.type,c("diffuse"))){
+  if(!is.element(prior.type,c("default"))){
     stop("specified prior type is wrong.")
   }
   

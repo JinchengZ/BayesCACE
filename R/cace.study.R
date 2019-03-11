@@ -1,0 +1,109 @@
+cace.study <-
+  function(data, 
+           param=c("CACE", "u1", "v1", "s1", "b1", 
+                   "pi.c", "pi.n", "pi.a", "n", "a"),
+           prior.type="default", 
+           digits=4,n.adapt=1000,n.iter=100000,
+           n.burnin=floor(n.iter/2),n.chains=3,n.thin=max(1,floor((n.iter-n.burnin)/100000)),
+           conv.diag=FALSE,mcmc.samples=FALSE, two.step=FALSE, method="REML")    {
+    ## check the input parameters
+    options(warn=1)
+    
+    if(missing(data)) stop("need to specify data")
+    if(!missing(data) ){
+      study.id <- data$study.id[complete.cases(data)]
+      n000<-data$n000[complete.cases(data)]
+      n001<-data$n001[complete.cases(data)]
+      n010<-data$n010[complete.cases(data)]
+      n011<-data$n011[complete.cases(data)]
+      n100<-data$n100[complete.cases(data)]
+      n101<-data$n101[complete.cases(data)]
+      n110<-data$n110[complete.cases(data)]
+      n111<-data$n111[complete.cases(data)]
+      cat("NA is not allowed in the input data set;\n")
+      cat("the rows containing NA are removed.\n")
+    }
+    
+    if(length(study.id)!=length(n000) | length(n000)!=length(n001) | length(n001)!=length(n010) | 
+       length(n010)!=length(n011) | length(n011)!=length(n100) | length(n100)!=length(n101) |
+       length(n101)!=length(n110) | length(n110)!=length(n111) )
+      stop("study.id, n000, n001, n010, n011, n100, n101, n110, and n111 have different lengths. \n")
+    
+    ## jags model
+    modelstring<-model.single(prior.type)
+    
+    ## data prep
+    if(prior.type == "default"){
+      Ntol <- n000+n001+n010+n011+n100+n101+n110+n111
+      N0 <- n000+n001+n010+n011
+      N1 <- n100+n101+n110+n111
+      R <- cbind(n000,n001,n010,n011, n100,n101,n110,n111)
+      I <- length(Ntol)
+    }
+    
+    ## parameters to be paramed in jags
+    if(!is.element("CACE",param)) param<-c("CACE",param)
+    fullparam <- c("CACE", "u1", "v1", "s1", "b1", "pi.c", "pi.n", "pi.a")
+    if(!any(is.element(param, fullparam))) stop("parameters must be specified from the following:  
+                                                CACE, u1, v1, s1, b1, 
+                                                pi.c, pi.n, pi.a \n")
+    out<-NULL
+    out$model<-"cace.single"    
+    
+  for (i in 1:I) {
+    data.jags <- list(N0=N0[i], N1=N1[i], R=R[i,])
+    
+    ## jags initial value
+    rng.seeds<-sample(1000000,n.chains)
+    init.jags <- vector("list", n.chains)
+    for(ii in 1:n.chains){
+      init.jags[[ii]] <- list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = rng.seeds[ii])
+    }
+    
+    ## run jags
+    jags.m<-jags.model(file=textConnection(modelstring),data=data.jags,inits=init.jags,
+                       n.chains=n.chains,n.adapt=n.adapt)
+    update(jags.m,n.iter=n.burnin)
+    jags.out<-coda.samples.dic(model=jags.m,variable.names=param,n.iter=n.iter,thin=n.thin)
+    
+    smry<-summary(jags.out$samples)
+    smry<-cbind(smry$statistics[,c("Mean","SD")],smry$quantiles[,c("2.5%","50%","97.5%")])
+    smry<-signif(smry,digits=digits)
+    out$smry[[i]] <- smry
+    
+    for (j in 1:length(fullparam)){
+      if(is.element(fullparam[j],param)) {
+        out[[fullparam[j] ]]<-rbind(out[[fullparam[j] ]], smry[c(fullparam[j]), ])
+        }
+    }
+    
+    #dic
+    dev<-jags.out$dic[[1]] # mean deviance
+    pen<-jags.out$dic[[2]] # pD
+    pen.dev<-dev+pen # DIC
+    dic.stat<-rbind(dev,pen,pen.dev)
+    rownames(dic.stat)<-c("D.bar","pD","DIC")
+    colnames(dic.stat)<-""
+    out$DIC[[i]]<-dic.stat
+    
+    
+    if(conv.diag){
+      cat("MCMC convergence diagnostic statistics are calculated and saved in conv.out\n")
+      conv.out<-gelman.diag(jags.out$samples,multivariate=FALSE)
+      out$conv.out[[i]]<-conv.out$psrf
+    }
+    
+    if(mcmc.samples){
+      out$mcmc.samples[[i]]<-jags.out$samples
+    }
+  }
+    
+  if (two.step) {
+    out$meta <- rma(yi=Mean, sei=SD, data=out$CACE, method = method)
+  }
+  class(out)<-"cace.Bayes"
+  return(out)
+  options(warn=0)   
+}
+
+

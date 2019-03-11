@@ -1,9 +1,7 @@
-rm(list=ls())
 library(MASS)
 library(mvtnorm)
 library(coda)
 library(rjags)
-library(R2jags)
 # library(VGAM)
 
 coda.samples.dic <- function (model, variable.names, n.iter, thin, ...)
@@ -50,12 +48,3 @@ coda.samples.dic <- function (model, variable.names, n.iter, thin, ...)
   class(dic) <- "dic"
   return(list(samples=mcmc.list(ans), dic=dic))
 }
-
-# coda.samples.dic
-
-# samps.m0 <- coda.samples.dic(jags.m0, variable.names=params, n.iter=24000, thin=5)
-
-# summary(samps.m0$samples)
-# samps.m0$dic
-# summary(samps.m0$deviance, mean)[[1]]
-# summary(samps.m0$pD, mean)[[1]]
