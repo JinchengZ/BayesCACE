@@ -1,0 +1,124 @@
+Skip to content
+ 
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ @JinchengZ Sign out
+2
+0 0 cran/noncomplyR
+ Code  Issues 0  Pull requests 0  Projects 0  Wiki  Insights
+noncomplyR/vignettes/noncomplyR.Rmd
+@sscogges sscogges version 1.0
+1a9f8c2  on Aug 24, 2017
+96 lines (61 sloc)  9.1 KB
+    
+---
+title: "Introduction to noncomplyR"
+author: "Scott Coggeshall"
+date: "August 21st, 2017"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to noncomplyR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(noncomplyR)
+set.seed(101)
+```
+Non-compliance to treatment assignment is a common issue in randomized clinical trials (RCTs). The noncomplyR package provides convenient functions for using Bayesian methods to perform inference on the Complier Average Causal Effect, the focus of a compliance-based analysis. The models used in this package are based on Imbens and Rubin (1997). The package currently supports two types of outcome models: the Normal model and the Binary model. Conjugate priors are used to simplify the sampling procedure. Users can, however, supply their own hyperparameter values in order to affect the shape of the prior distribution, thus maintaining some flexibility in the modeling of prior information.
+
+This document takes you through the basic workflow of a compliance-based analysis using the noncomplyR package. To illustrate the workflow, we will work through an analysis of a randomized trial investigating the effect of vitamin A supplementation on childhood mortality.
+
+## Data: vitaminA 
+
+ Individuals in this study were randomly assigned to either receive or not receive vitamin A supplementation. However, some individuals in the treatment arm did not receive the treatment. The data are contained in a dataframe named `vitaminA`. The dataset contains `r nrow(vitaminA)` observations on 3 variables: survival (1 = lived, 0 = died), treatment assignment (1 = vitamin A, 0 = control), and treatment received (1 = vitamin A, 0 = no vitamin A). Note the order of the variables is outcome, treatment assignment, treatment received. This is the variable order that noncomplyR requires. 
+
+We now demonstrate how the main functions of the noncomplyR package can be applied in sequence to fit a non-compliance model and perform posterior-based inference on the CACE.
+
+## Step 1: Fit model with `compliance_chain` 
+
+The primary model-fitting function is `compliance_chain()`. This function uses the data augmentation algorithm to obtain a sample from the posterior distribution for the full set of model parameters. The following code performs 1000 iterations of the data augmentation algorithm and discards the initial 10. Note that we have specified the outcome_model as well as the set of assumptions that we will be making when fitting the model. 
+
+```{r}
+model_fit <- compliance_chain(vitaminA, outcome_model = "binary", exclusion_restriction = T,
+                              strong_access = T, n_iter = 1000, n_burn = 10)
+head(model_fit)
+```
+
+Since the `hyper_parameters` argument was not specified, `compliance_chain` automatically uses a non-informative flat prior. 
+
+## Step 2: Transform the fitted model into a sample from the posterior of the CACE with `cace`
+
+Once the model has been fit and a posterior sample obtained for the full set of model parameters, the corresponding posterior sample for the CACE can be obtained with the `cace` function. This function takes the following arguments: the results of a call to the `compliance_chain()` function, the outcome model used in fitting the model, and a logical value indicating whether the Strong Access Monotonicity assumption was made when fitting the model.
+
+```{r}
+cace_posterior <- cace(chain = model_fit, outcome_model = "binary", strong_access = T)
+head(cace_posterior)
+```
+
+## Step 3: Obtain summary statistics with `summarize_chain`
+
+Give the sample from the posterior, the user can directly compute quantities of interest. For convenience, the `summarize_chain` function computes the posterior mean, median, and 50%, 90%, and 95% credible intervals.
+
+```{r}
+summarize_chain(cace_posterior)
+```
+
+This example illustrates the basic workflow of a compliance-based analysis using noncomplyR: fit the full model using `compliance_chain()`, obtain the posterior for the CACE using `cace()`, and summarize using `summarize_cace()`.
+
+## Model Details
+The function defaults have been chosen so that a standard compliance-based analysis with non-informative priors can be easily performed. However, it may be the case that users have additional prior information that they would like to incorporate into the analysis. We now give further details about the (hyper)parameters underlying the models in this package, so that interested users can build prior information into the model by supplying their own hyperparameters.
+
+The distribution of the compliance types Compliers, Never Takers, and Always Takers is modeled as a Multinomial distribution with probability parameters $\omega_{c}, \omega_{n}, \omega_{a}$. The prior distribution on these parameters is a Dirichlet distribution with hyperparameters $\gamma_{c}, \gamma_{n}, \gamma_{a}$. Note that if the Strong Access Monotonicity assumption holds, then (hyper)parameters for the Always Takers drop out and this reduces to a Binomial data model with conjugate Beta prior. 
+
+For the Binary outcome model, the distribution of the outcome within compliance type $t$ under treatment assignment $z$ is modeled as a Bernoulli random variable with probability parameter $p_{tz}$. We then model the prior on this parameter using a Beta distribution with hyperparameters $\alpha_{tz}, \beta_{tz}$. 
+
+For the Normal outcome model, the distribution of the outcome within compliance type $t$ under treatment assignment $z$ is modeled as a Normal distribution with mean $\mu_{tz}$ and variance $\sigma^2_{tz}$. We assume the conjugate Normal-Inverse Gamma prior distribution for the mean and variance parameters. That is, the prior for $\sigma^2_{tz}$ is Inverse Gamma with hyperparameters $a_{tz}, b_{tz}$ and the prior for $\mu_{tz}$ conditional on $sigma^2_{tz}$ is Normal with prior mean $\theta_{tz}$ and prior variance $\sigma^2_{tz}V_{tz}$. 
+
+For both outcome models described above, note that if the Exclusion Restriction holds then the Never Takers under both assignment to control and treatment can be modeled with a single set of (hyper)parameters, and similarly for the Always Takers. And, if the Strong Access Monotonicity assumption holds, then any hyper(parameters) related to the Always Takers drop out of the model.
+
+
+Users can incorporate prior information in the fitting of the model by supplying values to the `hyper_parameters` argument of `compliance_chain()`. The number of values to supply and the order in which they should be supplied will depend on the outcome model and the set of assumptions made when fitting the model. The convention for the ordering of the (hyper)parameters is the following: 
+
+* (hyper)parameters for the compliance type distributions come before (hyper)parameters for the outcome distributions
+* within each of these two groups of parameters, (hyper)parameters for Compliers come before (hyper)parameters for Never Takers which come before (hyper)parameters for Always Takers
+* within each compliance-type, (hyper)parameters for the outcome of the control group come before hyper(parameters) for the outcome of the treatment group
+* for the Normal outcome model, mean (hyper)parameters come before variance (hyper)parameters
+
+As an example, consider the Binary outcome model with the Exclusion Restriction but without the Strong Access monotonicity assumption. The parameters for this model are 
+
+* 3 parameters $\omega_{c}, \omega_{n}, \omega_{a}$ for the 3 compliance types
+* 4 parameters $p_{c0}, p_{c1}, p_{n}, p_{a}$ for the outcomes: one for the outcomes for Compliers assigned to control, one for the outcomes for Compliers assigned to treatment, one for Never Takers, and one for Always Takers
+
+Based on the conventions described above, the full set of model parameters would be ordered as $(\omega_{c}, \omega_{n}, \omega_{a}, p_{c0}, p_{c1}, p_{n}, p_{a})$. The hyperparameters should therefore be ordered as $(\gamma_{c}, \gamma_{n}, \gamma_{a}, \alpha_{c0}, \beta_{c0}, \alpha_{c1}, \beta_{c1}, \alpha_{n}, \beta_{n}, \alpha_{a}, \beta_{a})$.
+
+Now consider the Normal outcome model without the Exclusion Restriction but with the Strong Access monotonicity assumption. The parameters for this model
+
+* 2 parameters $\omega_{c}, \omega_{n}$ for the 2 compliance types
+* 8 parameters $\mu_{c0}, \sigma^2_{c0}, \mu_{c1}, \sigma^2_{c1}, \mu_{n0}, \sigma^2_{n0}, \mu_{n1}, \sigma^2_{n1}$ for the mean and variance in the Compliers under control, the Compliers under treatment, the Never Takers under control, and the Never Takers under treatment.
+
+The full set of model parameters should be ordered as $(\omega_{c}, \omega_{n}, \mu_{c0}, \sigma^2_{c0}, \mu_{c1}, \sigma^2_{c1}, \mu_{n0}, \sigma^2_{n0}, \mu_{n1}, \sigma^2_{n1} )$ based on the ordering conventions. The corresponding hyperparameters are then ordered as $(\gamma_{c}, \gamma_{n}, \theta_{c0}, V_{c0}, a_{c0}, b_{c0}, \theta_{c1}, V_{c1}, a_{c1}, b_{c1}, \theta_{n0}, V_{n0}, a_{n0}, b_{n0}, \theta_{n1}, V_{n1}, a_{n1}, b_{n1})$.
+
+
+## References
+
+Guido W. Imbens and Donald B. Rubin. "Bayesian Inference for Causal Effects in Randomized Experiments with Noncompliance". The Annals of Statistics. 25 (1), 1997.
+
+© 2019 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Help
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About

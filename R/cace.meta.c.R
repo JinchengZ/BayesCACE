@@ -1,13 +1,13 @@
 cace.meta.c <-
   function(data, 
-           param=c("CACE", "u1out", "v1out", "s1out", "b1out", 
-                   "pic", "pin", "pia", "alpha.n", "alpha.a"),
-           prior.type="default", 
-           delta.n=TRUE, delta.a=TRUE, delta.u=TRUE, delta.v=TRUE, 
-           delta.s=TRUE, delta.b=TRUE, cor=FALSE, 
-           digits=4,n.adapt=1000,n.iter=100000,
-           n.burnin=floor(n.iter/2),n.chains=3,n.thin=max(1,floor((n.iter-n.burnin)/100000)),
-           conv.diag=FALSE,mcmc.samples=FALSE, study.specific=FALSE)    {
+           param = c("CACE", "u1out", "v1out", "s1out", "b1out", 
+                   "pic", "pin", "pia"),
+           prior.type = "default", 
+           delta.n = TRUE, delta.a = TRUE, delta.u = TRUE, delta.v = TRUE, 
+           delta.s = TRUE, delta.b = TRUE, cor = TRUE, 
+           digits = 4, n.adapt = 1000, n.iter = 100000,
+           n.burnin = floor(n.iter/2), n.chains = 3, n.thin = max(1,floor((n.iter-n.burnin)/100000)),
+           conv.diag = FALSE, mcmc.samples = FALSE, study.specific = FALSE)    {
     ## check the input parameters
     options(warn=1)
     
@@ -42,7 +42,7 @@ cace.meta.c <-
       warning("no random effect is assigned to the response rate u1 or v1, \n
            study-specific CACE is the same across studies. \n
            the model is continued by making 'study.specific=FALSE'. \n
-           to make a CACE forestplot, please run 'cace.byeach.c' to estimate study level CACEs. \n")
+           to make a CACE forestplot, please run 'cace.study' to estimate study level CACEs. \n")
       study.specific=FALSE
     }
       

@@ -1,11 +1,9 @@
 cace.study <-
-  function(data, 
-           param=c("CACE", "u1", "v1", "s1", "b1", 
-                   "pi.c", "pi.n", "pi.a", "n", "a"),
-           prior.type="default", 
-           digits=4,n.adapt=1000,n.iter=100000,
-           n.burnin=floor(n.iter/2),n.chains=3,n.thin=max(1,floor((n.iter-n.burnin)/100000)),
-           conv.diag=FALSE,mcmc.samples=FALSE, two.step=FALSE, method="REML")    {
+  function(data, param = c("CACE", "u1", "v1", "s1", "b1", "pi.c", "pi.n", 
+          "pi.a"), prior.type = "default", digits = 4, n.adapt = 1000, 
+           n.iter = 100000, n.burnin = floor(n.iter/2), n.chains = 3, n.thin =  
+          max(1,floor((n.iter-n.burnin)/1e+05)), conv.diag = FALSE, mcmc.samples
+           = FALSE, two.step = FALSE, method = "REML")    {
     ## check the input parameters
     options(warn=1)
     

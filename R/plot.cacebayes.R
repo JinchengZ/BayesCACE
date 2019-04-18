@@ -1,6 +1,6 @@
 plot.cacebayes <- 
   function(obj, which = c("trace", "density", "autocorr"), 
-           param = c("CACE"),  ...) {
+           param = c("CACE"), trialnumber = 1, ...) {
   if(missing(obj)) stop("need to specify obj, the object generated from one of the following functions:\n
          cace.study, cace.meta.c, cace.meta.ic.\n")
   if (!inherits(obj, "cace.Bayes"))
@@ -13,79 +13,86 @@ plot.cacebayes <-
     stop("'obj$mcmc.samples' must be a mcmc.list or list generated from one of the following functions:\n
          cace.study, cace.meta.c, cace.meta.ic.")
     if(class(obj$mcmc.samples) =="mcmc.list") {x <- obj$mcmc.samples}
-    else if(class(obj$mcmc.samples) =="list") {x <- obj$mcmc.samples[[1]]}
-    
-  which <- match.arg(which)  
-  param <- match.arg(param)
-  
-  n.chains <- length(x)
-  cols<-rainbow(n.chains,s=0.6,v=0.6)
-    
-  if (which == "trace") {   
-    if (n.chains==1) {
-      nams <- dimnames(x)[[2]]
-      if(is.element(param, nams)) {
-        temp<-as.vector(x[,param])
-        plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
-             main = paste("Trace Plot of", param))  
-      } 
+    if(class(obj$mcmc.samples) =="list") {
+      if(!trialnumber %in% c(1:length(obj$mcmc.samples)))
+        stop("'trialnumber' should be the trial number to be plotted \n")
+      else {x <- obj$mcmc.samples[[trialnumber]]}
     }
-    else if (n.chains >1) {
-      nams <- dimnames(x[[1]])[[2]]
-      if(is.element(param, nams)) {
-        temp<-as.vector(x[[1]][,param])
-        plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
-             main = paste("Trace Plot of", param))    
-      } 
-      for(j in 2:n.chains){
-        temp<-as.vector(x[[j]][,param])
-        lines(temp,type="l",col=cols[j])
+  
+  for (i in 1:length(which)) {
+    whichi <- which[i]
+    param <- param
+    
+    n.chains <- length(x)
+    cols<-rainbow(n.chains,s=0.6,v=0.6)
+    
+    if (whichi == "trace") {   
+      if (n.chains==1) {
+        nams <- dimnames(x)[[2]]
+        if(is.element(param, nams)) {
+          temp<-as.vector(x[,param])
+          plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
+               main = paste("Trace Plot of", param))  
+        } 
+      }
+      else if (n.chains >1) {
+        nams <- dimnames(x[[1]])[[2]]
+        if(is.element(param, nams)) {
+          temp<-as.vector(x[[1]][,param])
+          plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
+               main = paste("Trace Plot of", param))    
+        } 
+        for(j in 2:n.chains){
+          temp<-as.vector(x[[j]][,param])
+          lines(temp,type="l",col=cols[j])
+        }
+      }
+    }  
+    
+    else if (whichi == "density") {   
+      if (n.chains==1) {
+        nams <- dimnames(x)[[2]]
+        if(is.element(param, nams)) {
+          temp<-as.vector(x[,param])
+          bw <- bw.SJ(temp) * 1.5
+          plot(density(temp, bw = bw), xlab = param, 
+               main = paste("Density of", param))
+        } 
+      }
+      else if (n.chains >1) {
+        nams <- dimnames(x[[1]])[[2]]
+        if(is.element(param, nams)) {
+          temp<-NULL
+          for(j in 1:n.chains){
+            temp<-c(temp, as.vector(x[[j]][,param]))
+          }
+          bw <- bw.SJ(temp) * 1.5
+          plot(density(temp, bw = bw), xlab = param, 
+               main = paste("Density of", param))
+        } 
+      }
+    }  
+    else if (whichi == "autocorr"){
+      if (n.chains==1) {
+        nams <- dimnames(x)[[2]]
+        if(is.element(param, nams)) {
+          temp<-as.vector(x[,param])
+          acf(temp, ylab = param, main = paste("Series", param))
+        } 
+      }
+      else if (n.chains >1) {
+        nams <- dimnames(x[[1]])[[2]]
+        if(is.element(param, nams)) {
+          temp<-NULL
+          for(j in 1:n.chains){
+            temp<-c(temp, as.vector(x[[j]][,param]))
+          }
+          acf(temp, ylab = param, main = paste("Series", param))
+        } 
       }
     }
-  }  
-
-  else if (which == "density") {   
-    if (n.chains==1) {
-      nams <- dimnames(x)[[2]]
-      if(is.element(param, nams)) {
-        temp<-as.vector(x[,param])
-        bw <- bw.SJ(temp) * 1.5
-        plot(density(temp, bw = bw), xlab = param, 
-             main = paste("Density of", param))
-      } 
-    }
-    else if (n.chains >1) {
-      nams <- dimnames(x[[1]])[[2]]
-      if(is.element(param, nams)) {
-        temp<-NULL
-        for(j in 1:n.chains){
-          temp<-c(temp, as.vector(x[[j]][,param]))
-        }
-        bw <- bw.SJ(temp) * 1.5
-        plot(density(temp, bw = bw), xlab = param, 
-             main = paste("Density of", param))
-      } 
-    }
-  }  
-  else if (which == "autocorr"){
-    if (n.chains==1) {
-      nams <- dimnames(x)[[2]]
-      if(is.element(param, nams)) {
-        temp<-as.vector(x[,param])
-        acf(temp, ylab = param, main = paste("Series", param))
-      } 
-    }
-    else if (n.chains >1) {
-      nams <- dimnames(x[[1]])[[2]]
-      if(is.element(param, nams)) {
-        temp<-NULL
-        for(j in 1:n.chains){
-          temp<-c(temp, as.vector(x[[j]][,param]))
-        }
-        acf(temp, ylab = param, main = paste("Series", param))
-      } 
-    }
   }
+  
   invisible()
 }
 

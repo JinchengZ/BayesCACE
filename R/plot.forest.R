@@ -1,16 +1,16 @@
 plot.forest <- 
-  function(data, obj) {
+  function(data, obj, ...) {
     if(missing(obj)) stop("need to specify obj, the object generated from one of the following functions:
-         cace.meta.c, cace.meta.ic.\n")
+         cace.study, cace.meta.c, cace.meta.ic.\n")
     if (!inherits(obj, "cace.Bayes"))
       stop("Use only with 'cace.Bayes' objects, the output generated from one of the following functions:
-           cace.meta.c, cace.meta.ic.\n")
+         cace.study, cace.meta.c, cace.meta.ic.\n")
     
     if(missing(data)) stop("need to specify data")
     
     if(!class(obj$smry) %in% c("matrix", "list") ){
       stop("'obj$smry' must be a matrix or list generated from one of the following functions:
-           cace.meta.c, cace.meta.ic.")
+         cace.study, cace.meta.c, cace.meta.ic.")
     }
     if (class(obj$smry) == "matrix"){
       x <- obj$smry
@@ -19,6 +19,11 @@ plot.forest <-
     else if (class(obj$smry) == "list"){
       outcacei <- obj$CACE
       if (nrow(outcacei) == 1) stop("forestplot cannot be made for a single study")
+      if (is.null(obj$meta)) stop("the two-step method did not run on cace.sudy \n
+                                 please input the object obtained from 'cace.meta.c' as obj2 \n") 
+      x <- cbind(obj$meta$beta, obj$meta$beta, obj$meta$ci.lb, obj$meta$ci.ub)
+      row.names(x) <-  "CACE"
+      colnames(x) <-  c("Mean", "50%", "2.5%", "97.5%")
     }
     
     if(!nrow(data)==nrow(outcacei)) 
@@ -55,6 +60,15 @@ plot.forest <-
               round(x["CACE", "97.5%"], 3), ")", sep="" ) )
     )
     
+    
+    xticks <- seq(from = min(cace_lower), to = max(cace_upper), 
+                  by = (max(cace_upper)-min(cace_lower))/6)
+    xticks_3 <- round(xticks, 3)
+    xtlab <- rep(c(TRUE, FALSE), length.out = length(xticks))
+    attr(xticks_3, "labels") <- xtlab
+    own.f <- fpTxtGp(ticks = gpar(cex=0.85), xlab  = gpar(cex = 0.95))
+    
+    
     if(obj$model %in% c("cace.single", "cace.meta.c")) {
       forestplot(tabletext, 
                  boxsize = .2, 
@@ -63,8 +77,10 @@ plot.forest <-
                  lower = values$lower,
                  upper = values$upper,
                  new_page = TRUE, 
-                 is.summary=c(TRUE, TRUE, rep(FALSE,length(outcacei)), TRUE),
+                 is.summary=c(TRUE, TRUE, rep(FALSE,nrow(outcacei)), TRUE),
                  clip=c(-1.0, 1.0),
+                 xticks = xticks_3,
+                 txt_gp = own.f,
                  col=fpColors(box="royalblue",line="darkblue", summary="royalblue")
       ) 
     }
@@ -89,6 +105,8 @@ plot.forest <-
                  is.summary=c(TRUE, TRUE, rep(FALSE,nrow(outcacei)), TRUE, TRUE),
                  clip=c(-1.0, 1.0), 
                  lty.ci = c(1, 5),
+                 xticks = xticks_3,
+                 txt_gp = own.f,
                  col=fpColors(box="royalblue",line="darkblue", summary="royalblue")
       ) 
     }
