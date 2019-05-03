@@ -1,6 +1,7 @@
-model.single <- function(prior.type="default"){
-  
-modelstring <- "model{
+model.study <- function(prior.type="default"){
+
+if(prior.type == "default"){ 
+string1 <- "model{
   prob[1] <- (pi.n*(1-s1) + pi.c*(1-v1))
   prob[2] <- (pi.n*s1 + pi.c*v1)
   prob[3] <- (pi.a*(1-b1))
@@ -22,8 +23,9 @@ modelstring <- "model{
   logit(b1) <- alpha.b
   
   CACE <- u1-v1
-  
-  # priors
+"
+string2 <-
+  "# priors
   n ~ dnorm(0, 0.16)
   a ~ dnorm(0, 0.16)
   alpha.s ~ dnorm(0, 0.25)
@@ -32,10 +34,18 @@ modelstring <- "model{
   alpha.v ~ dnorm(0, 0.25)
   }
   "
+modelstring <- paste(string1, string2, sep="\n")
+}
 
-  if(!is.element(prior.type,c("default"))){
-    stop("specified prior type is wrong.")
-  }
+  
+else if (prior.type == "custom"){
+  string2 <- prior.study(prior.type)
+  modelstring <- paste(string1, string2, sep="\n")
+}
+  
+if(!is.element(prior.type,c("default", "custom"))){
+  stop("specified prior type should be either 'default' or 'custom'.")
+}
   
   return(modelstring)
 }

@@ -4,7 +4,7 @@ cace.meta.ic <-
            prior.type = "default", 
            delta.n = TRUE, delta.a = TRUE, delta.u = TRUE, delta.v = TRUE, 
            delta.s = TRUE, delta.b = TRUE, cor = TRUE, 
-           digits = 4, n.adapt = 1000, n.iter = 100000,
+           digits = 3, n.adapt = 1000, n.iter = 100000,
            n.burnin = floor(n.iter/2), n.chains = 3, 
            n.thin = max(1,floor((n.iter-n.burnin)/100000)),
            conv.diag = FALSE, mcmc.samples = FALSE, study.specific = FALSE)    {
@@ -135,7 +135,8 @@ cace.meta.ic <-
     out$model<-"cace.meta.ic"
     
     smry<-summary(jags.out$samples)
-    smry<-cbind(smry$statistics[,c("Mean","SD")],smry$quantiles[,c("2.5%","50%","97.5%")])
+    smry<-cbind(smry$statistics[,c("Mean","SD")],smry$quantiles[,c("2.5%","50%","97.5%")], 
+                smry$statistics[,c("Naive SE","Time-series SE")])
     smry<-signif(smry,digits=digits)
     out$smry <- smry
     

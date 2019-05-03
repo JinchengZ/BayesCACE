@@ -41,113 +41,119 @@ alpha.b ~  dnorm(0, 0.25)
 alpha.u ~  dnorm(0, 0.25)
 alpha.v ~  dnorm(0, 0.25)
 "
-if(!is.element(prior.type,c("default"))){
-  stop("specified prior type is wrong.")
+if(!is.element(prior.type,c("default", "custom"))){
+  stop("specified prior type should be either 'default' or 'custom'.")
 }
 
-if(Ind[7]==1){
-  string2_0 <- 
-"delta.n[i] <- delta.rho[1, i]
-delta.a[i] <- delta.rho[2, i]
-delta.rho[1:2, i] ~ dmnorm(c(0, 0), Omega.rho)"
-  string4_0 <- 
-"II[1,1] <- 1
-II[2,2] <- 1
-II[1,2] <- 0
-II[2,1] <- 0
-Omega.rho ~  dwish (II[,], 3)
-Sigma.rho <- inverse(Omega.rho)
-sigma.n <- Sigma.rho[1, 1]
-sigma.a <- Sigma.rho[2, 2]
-rho <- Sigma.rho[1, 2]"
-string2_1 <- string2_2 <- ""
-string4_1 <- string4_2 <- ""
-}
-  
-else if (Ind[7]==0){
-  string2_0 <- string4_0 <- ""
-  
-  if(Ind[1]==1){
-    string2_1 <- "delta.n[i] ~ dnorm(0, tau.n)"
-    string4_1 <- 
-  "tau.n ~ dgamma(2, 2)
-sigma.n <- 1/sqrt(tau.n)"
+if(prior.type == "default"){
+  if(Ind[7]==1){
+    string2_0 <- 
+  "delta.n[i] <- delta.rho[1, i]
+  delta.a[i] <- delta.rho[2, i]
+  delta.rho[1:2, i] ~ dmnorm(c(0, 0), Omega.rho)"
+    string4_0 <- 
+  "II[1,1] <- 1
+  II[2,2] <- 1
+  II[1,2] <- 0
+  II[2,1] <- 0
+  Omega.rho ~  dwish (II[,], 3)
+  Sigma.rho <- inverse(Omega.rho)
+  sigma.n <- Sigma.rho[1, 1]
+  sigma.a <- Sigma.rho[2, 2]
+  rho <- Sigma.rho[1, 2]"
+  string2_1 <- string2_2 <- ""
+  string4_1 <- string4_2 <- ""
   }
-  else if (Ind[1]==0){
-    string2_1 <- ""
-    string4_1 <- ""
+    
+  else if (Ind[7]==0){
+    string2_0 <- string4_0 <- ""
+    
+    if(Ind[1]==1){
+      string2_1 <- "delta.n[i] ~ dnorm(0, tau.n)"
+      string4_1 <- 
+    "tau.n ~ dgamma(2, 2)
+  sigma.n <- 1/sqrt(tau.n)"
+    }
+    else if (Ind[1]==0){
+      string2_1 <- ""
+      string4_1 <- ""
+    }
+    
+    if(Ind[2]==1){
+      string2_2 <- "delta.a[i] ~ dnorm(0, tau.a)"
+      string4_2 <- 
+    "tau.a ~ dgamma(2, 2)
+  sigma.a <- 1/sqrt(tau.a)"
+    }
+    else if (Ind[2]==0){
+      string2_2 <- ""
+      string4_2 <- ""
+    }
+  }  
+    
+  if(Ind[3]==1){
+    string2_3 <- "delta.u[i] ~ dnorm(0, tau.u)"
+    string4_3 <- 
+  "u1out <- phi(alpha.u/sqrt(1+sigma.u^2))
+  tau.u ~ dgamma(2, 2)
+  sigma.u <- 1/sqrt(tau.u)"
   }
-  
-  if(Ind[2]==1){
-    string2_2 <- "delta.a[i] ~ dnorm(0, tau.a)"
-    string4_2 <- 
-  "tau.a ~ dgamma(2, 2)
-sigma.a <- 1/sqrt(tau.a)"
+  else if (Ind[3]==0){
+    string2_3 <- ""
+    string4_3 <- "u1out <- phi(alpha.u)"
   }
-  else if (Ind[2]==0){
-    string2_2 <- ""
-    string4_2 <- ""
+    
+  if(Ind[4]==1){
+    string2_4 <- "delta.v[i] ~ dnorm(0, tau.v)"
+    string4_4 <- 
+  "v1out <- phi(alpha.v/sqrt(1+sigma.v^2))
+  CACE <- u1out-v1out
+  tau.v ~ dgamma(2, 2)
+  sigma.v <- 1/sqrt(tau.v)"
   }
-}  
-  
-if(Ind[3]==1){
-  string2_3 <- "delta.u[i] ~ dnorm(0, tau.u)"
-  string4_3 <- 
-"u1out <- phi(alpha.u/sqrt(1+sigma.u^2))
-tau.u ~ dgamma(2, 2)
-sigma.u <- 1/sqrt(tau.u)"
-}
-else if (Ind[3]==0){
-  string2_3 <- ""
-  string4_3 <- "u1out <- phi(alpha.u)"
-}
-  
-if(Ind[4]==1){
-  string2_4 <- "delta.v[i] ~ dnorm(0, tau.v)"
-  string4_4 <- 
-"v1out <- phi(alpha.v/sqrt(1+sigma.v^2))
-CACE <- u1out-v1out
-tau.v ~ dgamma(2, 2)
-sigma.v <- 1/sqrt(tau.v)"
-}
-else if (Ind[4]==0){
-  string2_4 <- ""
-  string4_4 <- 
-"v1out <- phi(alpha.v)
-CACE <- u1out-v1out"
-}
-  
-if(Ind[5]==1){
-  string2_5 <- "delta.s[i] ~ dnorm(0, tau.s)"
-  string4_5 <- 
-"s1out <- ilogit(alpha.s/sqrt(1 + (16^2*3/(15^2*pi^2))*sigma.s^2))
-tau.s ~ dgamma(2, 2)
-sigma.s <- 1/sqrt(tau.s)"
-}
-else if (Ind[5]==0){
-  string2_5 <- ""
-  string4_5 <- "s1out <- ilogit(alpha.s)"
-}  
-  
-if(Ind[6]==1){
-  string2_6 <- "delta.b[i] ~ dnorm(0, tau.b)
-}"
-  string4_6 <- 
-"b1out <- ilogit(alpha.b/sqrt(1 + (16^2*3/(15^2*pi^2))*sigma.b^2))
-tau.b ~ dgamma(2, 2)
-sigma.b <- 1/sqrt(tau.b)
-}"
-}
-else if (Ind[6]==0){
-  string2_6 <- "
-}"
-  string4_6 <- "b1out <- ilogit(alpha.b)
-}"
-}   
+  else if (Ind[4]==0){
+    string2_4 <- ""
+    string4_4 <- 
+  "v1out <- phi(alpha.v)
+  CACE <- u1out-v1out"
+  }
+    
+  if(Ind[5]==1){
+    string2_5 <- "delta.s[i] ~ dnorm(0, tau.s)"
+    string4_5 <- 
+  "s1out <- ilogit(alpha.s/sqrt(1 + (16^2*3/(15^2*pi^2))*sigma.s^2))
+  tau.s ~ dgamma(2, 2)
+  sigma.s <- 1/sqrt(tau.s)"
+  }
+  else if (Ind[5]==0){
+    string2_5 <- ""
+    string4_5 <- "s1out <- ilogit(alpha.s)"
+  }  
+    
+  if(Ind[6]==1){
+    string2_6 <- "delta.b[i] ~ dnorm(0, tau.b)
+  }"
+    string4_6 <- 
+  "b1out <- ilogit(alpha.b/sqrt(1 + (16^2*3/(15^2*pi^2))*sigma.b^2))
+  tau.b ~ dgamma(2, 2)
+  sigma.b <- 1/sqrt(tau.b)
+  }"
+  }
+  else if (Ind[6]==0){
+    string2_6 <- "
+  }"
+    string4_6 <- "b1out <- ilogit(alpha.b)
+  }"
+  }   
 
   
 modelstring <- paste(string1, string2_0, string2_1, string2_2, string2_3, string2_4, string2_5, string2_6,
                      string3, string4_0, string4_1, string4_2, string4_3, string4_4, string4_5, string4_6, sep="\n")
-
+}
+  
+else if (prior.type == "custom"){
+  string2 <- prior.meta(prior.type)
+  modelstring <- paste(string1, string2, sep="\n")
+}
 return(modelstring)
 }

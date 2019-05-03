@@ -1,6 +1,6 @@
 cace.study <-
   function(data, param = c("CACE", "u1", "v1", "s1", "b1", "pi.c", "pi.n", 
-          "pi.a"), prior.type = "default", digits = 4, n.adapt = 1000, 
+          "pi.a"), prior.type = "default", digits = 3, n.adapt = 1000, 
            n.iter = 100000, n.burnin = floor(n.iter/2), n.chains = 3, n.thin =  
           max(1,floor((n.iter-n.burnin)/1e+05)), conv.diag = FALSE, mcmc.samples
            = FALSE, two.step = FALSE, method = "REML")    {
@@ -28,7 +28,7 @@ cace.study <-
       stop("study.id, n000, n001, n010, n011, n100, n101, n110, and n111 have different lengths. \n")
     
     ## jags model
-    modelstring<-model.single(prior.type)
+    modelstring<-model.study(prior.type)
     
     ## data prep
     if(prior.type == "default"){
@@ -65,7 +65,8 @@ cace.study <-
     jags.out<-coda.samples.dic(model=jags.m,variable.names=param,n.iter=n.iter,thin=n.thin)
     
     smry<-summary(jags.out$samples)
-    smry<-cbind(smry$statistics[,c("Mean","SD")],smry$quantiles[,c("2.5%","50%","97.5%")])
+    smry<-cbind(smry$statistics[,c("Mean","SD")],smry$quantiles[,c("2.5%","50%","97.5%")], 
+                smry$statistics[,c("Naive SE","Time-series SE")])
     smry<-signif(smry,digits=digits)
     out$smry[[i]] <- smry
     
