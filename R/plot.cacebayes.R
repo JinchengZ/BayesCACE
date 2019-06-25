@@ -27,26 +27,35 @@ plot.cacebayes <-
     cols<-rainbow(n.chains,s=0.6,v=0.6)
     
     if (whichi == "trace") {   
-      if (n.chains==1) {
-        nams <- dimnames(x)[[2]]
-        if(is.element(param, nams)) {
-          temp<-as.vector(x[,param])
-          plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
-               main = paste("Trace Plot of", param))  
-        } 
+      # if (n.chains==1) {
+      #   nams <- dimnames(x)[[2]]
+      #   if(is.element(param, nams)) {
+      #     temp<-as.vector(x[,param])
+      #     plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
+      #          main = paste("Trace Plot of", param))  
+      #   } 
+      # }
+      # else if (n.chains >1) {
+      #   nams <- dimnames(x[[1]])[[2]]
+      #   if(is.element(param, nams)) {
+      #     temp<-as.vector(x[[1]][,param])
+      #     plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
+      #          main = paste("Trace Plot of", param))    
+      #   } 
+      #   for(j in 2:n.chains){
+      #     temp<-as.vector(x[[j]][,param])
+      #     lines(temp,type="l",col=cols[j])
+      #   }
+      # }
+      
+      par(mfrow=c(n.chains,1))
+      for(j in 1:n.chains){
+        temp<-as.vector(x[[j]][,param])
+        plot(temp,type="l",col="red",ylab=param,xlab="Iterations",
+            main = paste("Trace Plot of", param,", Chain",j), 
+            lwd=1,cex.axis=1.2,cex.lab=1.4)
       }
-      else if (n.chains >1) {
-        nams <- dimnames(x[[1]])[[2]]
-        if(is.element(param, nams)) {
-          temp<-as.vector(x[[1]][,param])
-          plot(temp,type="l",col=cols[1],ylab=param,xlab="Iterations", 
-               main = paste("Trace Plot of", param))    
-        } 
-        for(j in 2:n.chains){
-          temp<-as.vector(x[[j]][,param])
-          lines(temp,type="l",col=cols[j])
-        }
-      }
+      par(mfrow=c(1,1))
     }  
     
     else if (whichi == "density") {   
