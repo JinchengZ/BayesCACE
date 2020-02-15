@@ -1,4 +1,7 @@
-export(absolute.plot, contrast.plot, nma.ab.bin, nma.ab.cont, nma.ab.followup, nma.ab.py, nma.networkplot, rank.prob)
+export(cace.meta.c, cace.meta.ic, cace.study, fun_code_dic, 
+      model.meta.c, model.meta.ic, model.study, 
+      plot.cacebayes, plot.forest, plot.noncomp, plot.meta.c, 
+      prior.study)
 
 import(rjags, coda, grDevices, methods)
 

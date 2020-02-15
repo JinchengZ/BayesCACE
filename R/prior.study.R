@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 prior.single <- function(prior.type="custom"){
   
   string2 <-   
@@ -13,7 +12,7 @@ prior.single <- function(prior.type="custom"){
 
 return(string2)
 }
-=======
+
 prior.single <- function(prior.type="custom"){
   
   string2 <-   
@@ -28,4 +27,3 @@ prior.single <- function(prior.type="custom"){
 
 return(string2)
 }
->>>>>>> 3c97488a87eeaca4b1b2ab7f216b9673bdb46721

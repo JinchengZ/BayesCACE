@@ -1,9 +1,3 @@
-library(MASS)
-library(mvtnorm)
-library(coda)
-library(rjags)
-# library(VGAM)
-
 coda.samples.dic <- function (model, variable.names, n.iter, thin, ...)
 {
   load.module('dic') # necessary for pD and deviance monitor
