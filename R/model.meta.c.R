@@ -1,3 +1,5 @@
+#' @export
+#' 
 model.meta.c <- function(prior.type="default", Ind=Ind){
 
   string1 <-

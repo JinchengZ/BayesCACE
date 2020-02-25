@@ -1,3 +1,5 @@
+#' @export
+#' 
 cace.study <-
   function(data, param = c("CACE", "u1", "v1", "s1", "b1", "pi.c", "pi.n", 
           "pi.a"), prior.type = "default", digits = 3, n.adapt = 1000, 

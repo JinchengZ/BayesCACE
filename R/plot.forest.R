@@ -1,3 +1,5 @@
+#' @export
+#' 
 plot.forest <- 
   function(data, obj, ...) {
     if(missing(obj)) stop("need to specify obj, the object generated from one of the following functions:

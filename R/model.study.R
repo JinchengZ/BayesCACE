@@ -1,3 +1,5 @@
+#' @export
+#' 
 model.study <- function(prior.type="default"){
 
 if(prior.type == "default"){ 

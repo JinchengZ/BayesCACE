@@ -1,3 +1,5 @@
+#' @export
+#' 
 cace.meta.ic <-
   function(data, param = c("CACE", "u1out", "v1out", "s1out", "b1out", 
                    "pic", "pin", "pia"),

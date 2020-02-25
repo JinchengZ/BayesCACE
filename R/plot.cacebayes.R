@@ -1,3 +1,5 @@
+#' @export
+#' 
 plot.cacebayes <- 
   function(obj, which = c("trace", "density", "autocorr"), 
            param = c("CACE"), trialnumber = 1, ...) {
