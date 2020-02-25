@@ -1,9 +1,6 @@
-export(cace.meta.c, cace.meta.ic, cace.study, fun_code_dic, 
-      model.meta.c, model.meta.ic, model.study, 
-      plot.cacebayes, plot.forest, plot.noncomp, plot.meta.c, 
-      prior.study)
+export(cace.meta.c, cace.meta.ic, cace.study, fun_code_dic, model.meta.c, model.meta.ic, model.study, plot.cacebayes, plot.forest, plot.noncomp, plot.meta.c, prior.study)
 
-import(rjags, coda, grDevices, methods)
+import(rjags, coda)
 
 importFrom("graphics", "abline", "axis", "legend", "lines", "mtext", "par", "plot", "points", "rect", "text", "strwidth")
 importFrom("stats", "complete.cases", "density", "qnorm", "quantile", "update")
