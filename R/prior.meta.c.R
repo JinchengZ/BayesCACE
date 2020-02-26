@@ -1,3 +1,4 @@
+#' @return
 #' @export
 #' 
 prior.meta <- function(prior.type="custom"){

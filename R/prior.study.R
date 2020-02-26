@@ -1,3 +1,4 @@
+#' @return
 #' @export
 #' 
 prior.single <- function(prior.type="custom"){

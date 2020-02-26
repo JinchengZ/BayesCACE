@@ -1,3 +1,4 @@
+#' @return
 #' @export
 #' 
 plot.cacebayes <- 
