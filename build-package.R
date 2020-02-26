@@ -22,7 +22,7 @@ devtools::check()
 Sys.setenv("TAR" = "internal")
 Sys.getenv("PATH")
 devtools::build(manual = T)
-devtools::install_local("../BayesCACE_0.1.tar.gz", dependencies = NA, upgrade = "never")
+devtools::install_local("BayesCACE_0.1.tar.gz", dependencies = NA, upgrade = "never")
 
 
 ## generate the help manual.
