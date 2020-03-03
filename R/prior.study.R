@@ -1,3 +1,4 @@
+#' @title prior.single
 #' @return
 #' @export
 #' 

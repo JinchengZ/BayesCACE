@@ -1,3 +1,6 @@
+#' @import rjags
+#' @import coda
+#' @import metafor
 #' @export
 #' 
 cace.study <-

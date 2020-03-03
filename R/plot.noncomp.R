@@ -1,6 +1,9 @@
+#' @title plot.noncomp
+#' @param data data
+#' @import forestplot
 #' @return
 #' @export
-#' 
+#'  
 plot.noncomp <- 
   function(data, overall=TRUE) {
   if(missing(data)) stop("need to specify a data set with complete compliance information. \n")

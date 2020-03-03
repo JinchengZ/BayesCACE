@@ -1,6 +1,7 @@
+#' @import rjags
+#' @import coda
 #' @export
-
-
+#' 
 
 cace.meta.c <-
   function(data, 

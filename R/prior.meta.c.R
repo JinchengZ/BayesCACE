@@ -1,3 +1,4 @@
+#' @title prior.meta
 #' @return
 #' @export
 #' 

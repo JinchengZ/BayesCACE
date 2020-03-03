@@ -1,3 +1,5 @@
+#' @import rjags
+#' @import coda
 #' @export
 #' 
 coda.samples.dic <- function (model, variable.names, n.iter, thin, ...)

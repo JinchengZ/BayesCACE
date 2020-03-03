@@ -1,3 +1,8 @@
+#' @title plot.forest
+#' @param data data
+#' @param obj an S3 objective to plot
+#' @param param parameters
+#' @import forestplot
 #' @return
 #' @export
 #' 

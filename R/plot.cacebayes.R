@@ -1,6 +1,10 @@
+#' @title plot.cacebayes
+#' @param obj an S3 objective to plot
+#' @param param parameters
+#' @param trialnumber indicator for the trial number
 #' @return
 #' @export
-#' 
+
 plot.cacebayes <- 
   function(obj, which = c("trace", "density", "autocorr"), 
            param = c("CACE"), trialnumber = 1, ...) {
