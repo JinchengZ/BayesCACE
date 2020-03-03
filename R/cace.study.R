@@ -1,3 +1,4 @@
+#' @importFrom stats update complete.cases 
 #' @import rjags
 #' @import coda
 #' @import metafor

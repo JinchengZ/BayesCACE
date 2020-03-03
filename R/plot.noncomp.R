@@ -1,6 +1,8 @@
 #' @title plot.noncomp
 #' @param data data
 #' @import forestplot
+#' @importFrom graphics par plot
+#' @importFrom stats acf binom.test binomial coef confint
 #' @return
 #' @export
 #'  

@@ -1,4 +1,6 @@
 #' @title plot.forest
+#' @importFrom graphics par plot 
+#' @importFrom grid gpar
 #' @param data data
 #' @param obj an S3 objective to plot
 #' @param param parameters

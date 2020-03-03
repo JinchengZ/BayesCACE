@@ -1,4 +1,7 @@
 #' @title plot.cacebayes
+#' @importFrom grDevices rainbow 
+#' @importFrom graphics par plot
+#' @importFrom stats acf bw.SJ density
 #' @param obj an S3 objective to plot
 #' @param param parameters
 #' @param trialnumber indicator for the trial number
