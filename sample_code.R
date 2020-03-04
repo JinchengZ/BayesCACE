@@ -1,3 +1,11 @@
+## R package BayeCACE installation 
+library(devtools)
+devtools::install_github("JinchengZ/BayesCACE")
+setwd("C:/Users/jzhou02/Documents/Jincheng files/BayesCACE")
+Sys.setenv("TAR" = "internal")
+Sys.getenv("PATH")
+devtools::install_local("BayesCACE_0.1.tar.gz", dependencies = NA, upgrade = "never")
+
 library("BayesCACE")
 data("epidural_c", package = "BayesCACE")
 epidural_c
