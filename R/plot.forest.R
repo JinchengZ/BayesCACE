@@ -3,7 +3,7 @@
 #' @importFrom grid gpar
 #' @param data data
 #' @param obj an S3 objective to plot
-#' @param param parameters
+#' @param ... others
 #' @import forestplot
 #' @return
 #' @export
@@ -91,7 +91,7 @@ plot.forest <-
                  clip=c(-1.0, 1.0),
                  xticks = xticks_3,
                  txt_gp = own.f,
-                 col=fpColors(box="royalblue",line="darkblue", summary="royalblue")
+                 col=fpColors(box="royalblue",lines="darkblue", summary="royalblue")
       ) 
     }
     
@@ -117,7 +117,7 @@ plot.forest <-
                  lty.ci = c(1, 5),
                  xticks = xticks_3,
                  txt_gp = own.f,
-                 col=fpColors(box="royalblue",line="darkblue", summary="royalblue")
+                 col=fpColors(box="royalblue",lines="darkblue", summary="royalblue")
       ) 
     }
     

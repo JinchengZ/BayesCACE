@@ -1,8 +1,9 @@
-#' @title prior.single
+#' @title prior.study
+#' @param prior.type prior type, default is "custom"
 #' @return
 #' @export
 #' 
-prior.single <- function(prior.type="custom"){
+prior.study <- function(prior.type="custom"){
   
   string2 <-   
   "# priors

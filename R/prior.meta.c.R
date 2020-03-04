@@ -1,4 +1,5 @@
 #' @title prior.meta
+#' @param prior.type prior type, default is "custom"
 #' @return
 #' @export
 #' 

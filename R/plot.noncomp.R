@@ -1,8 +1,10 @@
 #' @title plot.noncomp
 #' @param data data
+#' @param overall overall
 #' @import forestplot
 #' @importFrom graphics par plot
 #' @importFrom stats acf binom.test binomial coef confint
+#' @importFrom lme4 glmer VarCorr
 #' @return
 #' @export
 #'  

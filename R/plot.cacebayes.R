@@ -5,6 +5,8 @@
 #' @param obj an S3 objective to plot
 #' @param param parameters
 #' @param trialnumber indicator for the trial number
+#' @param which choose from c("trace", "density", "autocorr")
+#' @param ... others
 #' @return
 #' @export
 

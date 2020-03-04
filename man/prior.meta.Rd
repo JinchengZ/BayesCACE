@@ -6,6 +6,9 @@
 \usage{
 prior.meta(prior.type = "custom")
 }
+\arguments{
+\item{prior.type}{prior type, default is "custom"}
+}
 \value{
 
 }

@@ -15,9 +15,13 @@
 \arguments{
 \item{obj}{an S3 objective to plot}
 
+\item{which}{choose from c("trace", "density", "autocorr")}
+
 \item{param}{parameters}
 
 \item{trialnumber}{indicator for the trial number}
+
+\item{...}{others}
 }
 \value{
 

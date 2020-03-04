@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 library("BayesCACE")
 data("epidural_c", package = "BayesCACE")
 epidural_c

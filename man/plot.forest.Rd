@@ -11,7 +11,7 @@
 
 \item{obj}{an S3 objective to plot}
 
-\item{param}{parameters}
+\item{...}{others}
 }
 \value{
 
