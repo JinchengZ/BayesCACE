@@ -8,7 +8,7 @@
 #' @param which choose from c("trace", "density", "autocorr")
 #' @param ... others
 #' @return
-#' @export
+#' @export plot.cacebayes
 
 plot.cacebayes <- 
   function(obj, which = c("trace", "density", "autocorr"), 

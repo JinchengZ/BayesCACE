@@ -6,7 +6,7 @@
 #' @importFrom stats acf binom.test binomial coef confint
 #' @importFrom lme4 glmer VarCorr
 #' @return
-#' @export
+#' @export plot.noncomp
 #'  
 plot.noncomp <- 
   function(data, overall=TRUE) {

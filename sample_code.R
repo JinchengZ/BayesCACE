@@ -1,12 +1,15 @@
+rm(list = ls())
 ## R package BayeCACE installation 
 library(devtools)
+Sys.setenv("TAR" = "internal")
 devtools::install_github("JinchengZ/BayesCACE")
 setwd("C:/Users/jzhou02/Documents/Jincheng files/BayesCACE")
-Sys.setenv("TAR" = "internal")
+
 Sys.getenv("PATH")
 devtools::install_local("BayesCACE_0.1.tar.gz", dependencies = NA, upgrade = "never")
 # remove.packages("BayesCACE")
-# BayesCACE::plot.cacebayes
+# BayesCACE:::plot.cacebayes
+getAnywhere('plot.cacebayes')
 
 library("BayesCACE")
 data("epidural_c", package = "BayesCACE")

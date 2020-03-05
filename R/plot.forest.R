@@ -6,7 +6,7 @@
 #' @param ... others
 #' @import forestplot
 #' @return
-#' @export
+#' @export plot.forest
 #' 
 plot.forest <- 
   function(data, obj, ...) {
