@@ -63,7 +63,7 @@ plot.cacebayes <-
       par(mfrow=c(n.chains,1))
       for(j in 1:n.chains){
         temp<-as.vector(x[[j]][,param])
-        plot(temp,type="l",col="red",ylab=param,xlab="Iterations",
+        traceplot <- plot(temp,type="l",col="red",ylab=param,xlab="Iterations",
             main = paste("Trace Plot of", param,", Chain",j), 
             lwd=1,cex.axis=1.2,cex.lab=1.4)
       }
@@ -76,7 +76,7 @@ plot.cacebayes <-
         if(is.element(param, nams)) {
           temp<-as.vector(x[,param])
           bw <- bw.SJ(temp) * 1.5
-          plot(density(temp, bw = bw), xlab = param, 
+          densplot <- plot(density(temp, bw = bw), xlab = param, 
                main = paste("Density of", param))
         } 
       }
@@ -88,7 +88,7 @@ plot.cacebayes <-
             temp<-c(temp, as.vector(x[[j]][,param]))
           }
           bw <- bw.SJ(temp) * 1.5
-          plot(density(temp, bw = bw), xlab = param, 
+          densplot <- plot(density(temp, bw = bw), xlab = param, 
                main = paste("Density of", param))
         } 
       }
@@ -98,7 +98,7 @@ plot.cacebayes <-
         nams <- dimnames(x)[[2]]
         if(is.element(param, nams)) {
           temp<-as.vector(x[,param])
-          acf(temp, ylab = param, main = paste("Series", param))
+          acfplot <- acf(temp, ylab = param, main = paste("Series", param))
         } 
       }
       else if (n.chains >1) {
@@ -108,12 +108,12 @@ plot.cacebayes <-
           for(j in 1:n.chains){
             temp<-c(temp, as.vector(x[[j]][,param]))
           }
-          acf(temp, ylab = param, main = paste("Series", param))
+          acfplot <- acf(temp, ylab = param, main = paste("Series", param))
         } 
       }
     }
   }
   
-  invisible()
+  return(list(traceplot, densplot, acfplot))
 }
 
