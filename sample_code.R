@@ -3,13 +3,11 @@ rm(list = ls())
 library(devtools)
 Sys.setenv("TAR" = "internal")
 devtools::install_github("JinchengZ/BayesCACE")
-setwd("C:/Users/jzhou02/Documents/Jincheng files/BayesCACE")
 
 Sys.getenv("PATH")
-devtools::install_local("BayesCACE_0.1.tar.gz", dependencies = NA, upgrade = "never")
+devtools::install_local("BayesCACE_1.0.tar.gz", dependencies = NA, upgrade = "never")
 # remove.packages("BayesCACE")
 # BayesCACE:::plot.cacebayes
-getAnywhere('plot.cacebayes')
 
 library("BayesCACE")
 data("epidural_c", package = "BayesCACE")
@@ -17,7 +15,7 @@ epidural_c
 data("epidural_ic", package = "BayesCACE")
 head(epidural_ic)
 
-noncomp <- plot.noncomp(data = epidural_c, overall = TRUE)
+plot.noncomp(data = epidural_c, overall = TRUE)
 
 set.seed(123)
 out.study <- cace.study(data = epidural_c, conv.diag = TRUE, mcmc.samples = 
@@ -35,9 +33,9 @@ set.seed(123)
 out.meta.ic <- cace.meta.ic(data = epidural_ic, conv.diag = TRUE, 
                             mcmc.samples = TRUE, study.specific = TRUE)
 
-plotsets <- plot.cacebayes(obj = out.meta.ic)
+plot.cacebayes(obj = out.meta.ic)
 
-forest_ic <- plot.forest(data = epidural_ic, obj = out.meta.ic)
+plot.forest(data = epidural_ic, obj = out.meta.ic)
 
-forest_c <- plot.forest(data = epidural_c, obj = out.study, obj2 = out.meta.c)
+plot.forest(data = epidural_c, obj = out.study, obj2 = out.meta.c)
 

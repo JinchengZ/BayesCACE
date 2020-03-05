@@ -22,8 +22,8 @@ devtools::check()
 Sys.setenv("TAR" = "internal")
 Sys.getenv("PATH")
 devtools::build(manual = T)
-devtools::install_local("../BayesCACE_0.1.tar.gz", dependencies = NA, upgrade = "never")
-
+devtools::install_local("../BayesCACE_1.0.tar.gz", dependencies = NA, upgrade = "never")
+# devtools::install_github("JinchengZ/BayesCACE")
 
 ## generate the help manual.
 pack <- "BayesCACE"
@@ -34,4 +34,3 @@ if (file.exists(paste0(pack, ".pdf"))) {file.remove(paste0(pack, ".pdf"))}
 system(paste(file.path(R.home(""), "R"), "CMD", "Rd2pdf", shQuote(path)))
 
 
-devtools::install_github("JinchengZ/BayesCACE")
