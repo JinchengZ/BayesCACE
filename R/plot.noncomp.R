@@ -1,13 +1,29 @@
-#' @title plot.noncomp
-#' @param data data
-#' @param overall overall
+#' This function provides a visual overview (forst plot) of study-specific 
+#' noncompliance rates in both randomization arms.
+#' @title     Plotting noncompliance rates
+#' @param data a dataset with structure like the example \code{epidural\_c} or \code{epidural\_ic}
+#' @param overall a logical value indicating whether a summary estimate of the compliance rates 
+#' per randomization group is provided. The default is `TRUE`. This overall rate is estimated 
+#' using a logit generalized linear mixed model.
 #' @import forestplot
 #' @importFrom graphics par plot
 #' @importFrom stats acf binom.test binomial coef confint
 #' @importFrom lme4 glmer VarCorr
-#' @return
+#' @return A forest plot of noncompliance rates in an \code{R} plot window
 #' @export plot.noncomp
-#'  
+#' @description Provides a forest plot of noncompliance rates in an \code{R} plot window. 
+#' @details  Only studies with full compliance information are included in this plot 
+#' because noncompliance rates cannot be calculated without compliance data. In the generated 
+#' plot, the red dot with its horizontal line shows the study-specific noncompliance rate 
+#' with its 95\% exact confidence interval for the patients randomized to the treatment arm, 
+#' and the blue square with its horizontal line represents that rate and interval for those 
+#' in the control arm. The confidence intervals are calculated by the Clopper--Pearson exact 
+#' method, which is based on the cumulative distribution function of the binomial distribution. 
+#' @examples
+#' plot.noncomp(data=epidrual_c, overall = TRUE)
+#' @backref 
+#' 
+
 plot.noncomp <- 
   function(data, overall=TRUE) {
   if(missing(data)) stop("need to specify a data set with complete compliance information. \n")

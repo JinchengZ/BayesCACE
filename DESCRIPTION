@@ -11,7 +11,6 @@ SystemRequirements: JAGS 4.x.y (http://mcmc-jags.sourceforge.net)
 Description: Performs CACE analysis on either a single study or meta-analysis of datasets with binary outcomes using the Bayesian methods of Zhou et al (2019) <doi:10.1111/biom.13028> and Zhou et al (2019) <doi:XXX>.
 License: GPL (>= 2)
 NeedsCompilation: no
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Encoding: UTF-8
 LazyData: true
-
