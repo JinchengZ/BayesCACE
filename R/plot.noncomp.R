@@ -20,7 +20,9 @@
 #' in the control arm. The confidence intervals are calculated by the Clopper--Pearson exact 
 #' method, which is based on the cumulative distribution function of the binomial distribution. 
 #' @examples
+#' \dontrun{
 #' plot.noncomp(data=epidrual_c, overall = TRUE)
+#' }
 #' @backref 
 #' 
 
