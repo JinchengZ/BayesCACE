@@ -1,7 +1,7 @@
 #' This function provides a visual overview (forst plot) of study-specific 
 #' noncompliance rates in both randomization arms.
 #' @title     Plotting noncompliance rates
-#' @param data a dataset with structure like the example \code{epidural\_c} or \code{epidural\_ic}
+#' @param data a dataset with structure like the example \code{epidural_c} or \code{epidural_ic}
 #' @param overall a logical value indicating whether a summary estimate of the compliance rates 
 #' per randomization group is provided. The default is `TRUE`. This overall rate is estimated 
 #' using a logit generalized linear mixed model.
@@ -20,7 +20,9 @@
 #' in the control arm. The confidence intervals are calculated by the Clopper--Pearson exact 
 #' method, which is based on the cumulative distribution function of the binomial distribution. 
 #' @examples
+#' \dontrun{
 #' plot.noncomp(data=epidrual_c, overall = TRUE)
+#' }
 #' @backref 
 #' 
 

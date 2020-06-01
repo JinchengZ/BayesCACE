@@ -1,7 +1,39 @@
+#' This function also estimates \eqn{\theta^\text{CACE}}using the Bayesian hierarchcal model 
+#' but can accommodate studies with incomplete compliance data.  
+#' The necessary data structure and the likelihood function are presented Section 2.3, 
+#' CACE for meta-analysis with incomplete compliance information.
 #' @importFrom stats update complete.cases
+#' @import Rdpack
 #' @import rjags
 #' @import coda
-#' @export
+#' @export 
+#' @title Bayesian hierarchical models for CACE meta-analysis with incomplete compliance information
+#' @param data a input dataset the same structure as the example data `epidural_ic`, 
+#' containing multiple rows referring to multiple studies in a meta-analysis. 
+#' @inheritParams cace.meta.c
+#' 
+#' @details  
+#' Note that when compiling the \code{JAGS} model, the warning `adaptation incomplete` may 
+#' occasionally occur, indicating that the number of iterations for the adaptation process 
+#' is not sufficient. The default value of \code{n.adapt} (the number of iterations for adaptation) 
+#' is 1,000. This is an initial sampling phase during which the samplers adapt their behavior 
+#' to maximize their efficiency (e.g., a Metropolis--Hastings random walk algorithm may change 
+#' its step size). The `adaptation incomplete` warning indicates the MCMC algorithm may not 
+#' achieve maximum efficiency, but it generally has little impact on the posterior estimates 
+#' of the treatment effects. To avoid this warning, users may increase \code{n.adapt}.
+#' 
+#' @examples
+#' \dontrun{
+#' data("epidural_ic", package = "BayesCACE")
+#' set.seed(123)
+#' out.meta.ic <- cace.meta.ic(data = epidural_ic, conv.diag = TRUE, 
+#' mcmc.samples = TRUE, study.specific = TRUE)
+#' }
+#' @seealso \code{\link[BayesCACE]{cace.study}}, \code{\link[BayesCACE]{cace.meta.c}}
+#' @references {
+#' \insertRef{zhou2019bayesian}{BayesCACE}
+#' \insertRef{zhou2020software}{BayesCACE}
+#' } 
 #' 
 cace.meta.ic <-
   function(data, param = c("CACE", "u1out", "v1out", "s1out", "b1out", 

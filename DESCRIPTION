@@ -6,11 +6,12 @@ Date: 2020-02-07
 Author: Jincheng Zhou, James S Hodges, and Haitao Chu
 Maintainer: Jincheng Zhou <jzhou@umn.edu>
 Depends: R (>= 3.5.0), rjags (>= 4-6)
-Imports: coda, grDevices, MASS, mvtnorm, forestplot, metafor, lme4
+Imports: coda, Rdpack, grDevices, MASS, mvtnorm, forestplot, metafor, lme4
 SystemRequirements: JAGS 4.x.y (http://mcmc-jags.sourceforge.net)
 Description: Performs CACE analysis on either a single study or meta-analysis of datasets with binary outcomes using the Bayesian methods of Zhou et al (2019) <doi:10.1111/biom.13028> and Zhou et al (2019) <doi:XXX>.
 License: GPL (>= 2)
 NeedsCompilation: no
 RoxygenNote: 7.1.0
+RdMacros: Rdpack
 Encoding: UTF-8
 LazyData: true

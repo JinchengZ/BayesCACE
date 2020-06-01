@@ -7,7 +7,7 @@
 \method{plot}{noncomp}(data, overall = TRUE)
 }
 \arguments{
-\item{data}{a dataset with structure like the example \code{epidural\_c} or \code{epidural\_ic}}
+\item{data}{a dataset with structure like the example \code{epidural_c} or \code{epidural_ic}}
 
 \item{overall}{a logical value indicating whether a summary estimate of the compliance rates 
 per randomization group is provided. The default is `TRUE`. This overall rate is estimated 
@@ -32,5 +32,7 @@ in the control arm. The confidence intervals are calculated by the Clopper--Pear
 method, which is based on the cumulative distribution function of the binomial distribution.
 }
 \examples{
+\dontrun{
 plot.noncomp(data=epidrual_c, overall = TRUE)
+}
 }

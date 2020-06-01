@@ -1,26 +1,30 @@
-#' This function performs CACE analysis for a single study using the likelihood and model 
-#' specified in the JSS paper Section 2.1.
-#' @importFrom stats update complete.cases 
+#' This function performs CACE analysis for a single study using the 
+#' likelihood and model specified in the paper Section 2.1, or a two-step 
+#' approach for meta-analysis with complete compliance information as 
+#' described in the paper Section 2.2 "The two-step approach".
+#' @importFrom stats update complete.cases
 #' @import rjags
 #' @import coda
 #' @import metafor
+#' @import Rdpack
 #' @export
-#' @title CACE analysis for a single study
-#' @param data a input dataset the same structure as the example data `epidural\_c`, 
+#' @title CACE analysis for a single study, or a two-step approach for meta-analysis 
+#' with complete complice information
+#' @param data a input dataset the same structure as the example data `epidural_c`, 
 #' containing either one row of observations for a single study, or multiple rows referring 
 #' to multiple studies in a meta-analysis. 
 #' @param param a character string vector indicating the parameters to be tracked and estimated. 
-#' By default all parameters in the model (see \code{details}) are included: \theta^\text{CACE} 
-#' (\code{CACE}), u_1 (\code{u1}), v_1 (\code{v1}), s_1 (\code{s1}), b_1 (\code{b1}), 
-#' \pi_a (\code{pi.a}), \pi_n (\code{pi.n}), and \pi_c=1-\pi_a-\pi_n (\code{pi.c}). 
+#' By default all parameters in the model (see \code{details}) are included: \eqn{\theta^{CACE}} 
+#' (\code{CACE}), \eqn{u_1} (\code{u1}), \eqn{v_1} (\code{v1}), \eqn{s_1} (\code{s1}), \eqn{b_1} (\code{b1}), 
+#' \eqn{\pi_a} (\code{pi.a}), \eqn{\pi_n} (\code{pi.n}), and \eqn{\pi_c=1-\pi_a-\pi_n} (\code{pi.c}). 
 #' Users can modify the string vector to only include parameters of interest besides 
-#' \theta^\text{CACE}. 
-#' @param prior.type the default priors are used by the default assignment `prior.type=``default"`.
+#' \eqn{\theta^{CACE}}. 
+#' @param prior.type the default priors are used by the default assignment `prior.type="default"`.
 #' They are assigned to the transformed scale of the following parameters:
-#' \pi_{n}=\frac{\exp(n)}{1+\exp(n)+\exp(a)}, \pi_{a}=\frac{\exp(a)}{1+\exp(n)+\exp(a)}, 
-#' \text{logit}(s_{1})=\alpha_s, \text{logit}(b_{1})=\alpha_b, \text{probit}(u_{1})=\alpha_u,
-#' and \text{probit}(v_{1})=\alpha_v, where n, a \sim N(0, 2.5^2) and \alpha_s, \alpha_b,
-#' \alpha_u, \alpha_v \sim N(0, 2^2). 
+#' \eqn{\pi_{n}=\frac{\exp(n)}{1+\exp(n)+\exp(a)}}, \eqn{\pi_{a}=\frac{\exp(a)}{1+\exp(n)+\exp(a)}}, 
+#' \eqn{{logit}(s_1)=\alpha_s}, \eqn{{logit}(b_1)=\alpha_b}, \eqn{{probit}(u_1)=\alpha_u},
+#' and \eqn{{probit}(v_1)=\alpha_v}, where \eqn{n, a \sim N(0, 2.5^2)} and \eqn{\alpha_s, \alpha_b,
+#' \alpha_u, \alpha_v \sim N(0, 2^2)}. 
 #' Alternatively, users can specify their own prior distributions for all parameters, 
 #' and save them as a file \code{prior.study.R} under the same directory with the model 
 #' function. By assigning `prior.type = "custom"`, the function calls the user-defined 
@@ -43,12 +47,11 @@
 #' @param n.thin a positive integer indicating thinning rate for MCMC chains, which is used to 
 #' avoid potential high auto-correlation and to save computer memory when \code{n.iter} is 
 #' large. The default is set as \code{1} or the largest integer not greater than 
-#' \code{((n.iter - n.burnin)/1e+05))}, whichever is larger. 
+#' \code{((n.iter - n.burnin)/1e+05)}, whichever is larger. 
 #' @param conv.diag a logical value indicating whether to compute the Gelman and Rubin 
-#' convergence statistic (\hat{R}) of each parameter as a convergence diagnostic.
+#' convergence statistic (\eqn{\hat{R}}) of each parameter as a convergence diagnostic.
 #' It is considered the chains are well mixed and have converged to the target distribution 
-#' if \hat{R} \mathrm{\le} \mathrm{1.1}. 
-#' The default is `FALSE`. If `TRUE`, \code{n.chains} must be greater than 1, 
+#' if \eqn{\hat{R} \le 1.1}. The default is `FALSE`. If `TRUE`, \code{n.chains} must be greater than 1, 
 #' and the function saves each chain's MCMC samples for all parameters, which can be used 
 #' to produce trace, posterior density, and auto-correlation plots by calling the function 
 #' \code{plot.cacebayes}. 
@@ -59,8 +62,7 @@
 #' for further model diagnostics. 
 #' @param two.step a logical value indicating whether to conduct a two-step meta-analysis. 
 #' If `two.step = TRUE`, the posterior mean and standard deviation of study-specific 
-#' \theta^\text{CACE}_i are used to perform a standard meta-analysis, using the R package 
-#' \code{metafor}. 
+#' \eqn{\theta^{CACE}_i} are used to perform a standard meta-analysis, using the R package \code{metafor}. 
 #' @param method the method used in meta-analysis if `two.step = TRUE`. The default estimation 
 #' method is the REML (restricted maximum-likelihood estimator) method for the random-effects 
 #' model. Users can change the argument \code{method} to obtain different meta-analysis 
@@ -70,40 +72,48 @@
 #' estimator.  More details are available from the documentation of the function \code{metafor::rma}. 
 #' If the input data include only one study, the meta-analysis result is just the same as 
 #' the result from the single study. 
-#' @return 
-#' @details  The likelihood \log L({\boldsymbol{\beta}}) = & {N_{000}\log\{\pi_{c}(1-v_{1})+\pi_{n}(1-s_{1})\}}+{N_{001}
-#' \log(\pi_{c}v_{1}+\pi_{n}s_{1})}+{N_{010}\log\{{\pi}_{a}(1-b_{1})}\} + {N_{011}\log\{{\pi}_{a}b_{1}}\}+{N_{100}
-#' \log\{{\pi }_{n}(1-s_{1})}\}+{N_{101}\log({\pi }_{n}s_{1}}) + {N_{110}\log\{(\pi_{c}(1-u_{1})+\pi_{a}(1-b_{1})\}}+
-#' {N_{111}\log(\pi_{c}u_{1}+\pi_{a}b_{1})} + \text{constant}.
-#' If the input \code{data} includes more than one study, the study-specific CACEs will be 
+#' 
+#' @details  
+#' The likelihood \deqn{\log L({\boldsymbol{\beta}}) = N_{000}\log\{\pi_{c}(1-v_1)+\pi_{n}(1-s_1)\}+N_{001}
+#' \log(\pi_{c}v_1+\pi_{n}s_1)+N_{010}\log\{{\pi}_{a}(1-b_1)\} + N_{011}\log\{\pi_{a}b_1\}+ N_{100}
+#' \log\{\pi_{n}(1-s_1)\}+N_{101}\log({\pi}_{n}s_1) + N_{110}\log\{(\pi_{c}(1-u_1)+\pi_{a}(1-b_1)\}+
+#' {N_{111}\log(\pi_{c}u_1+\pi_{a}b_1)} + constant}. If the input \code{data} includes more than one study, the study-specific CACEs will be 
 #' estimated by retrieving data row by row.
 #' One exmaple of the `prior.study.R` file if using `prior.type = "custom"`:
-#' \code{prior.study <- function(prior.type = "custom")
-#' {
-#' string2 <-   
-#' "# priors
-#'  n ~ dnorm(0, 0.01)
-#'  a ~ dnorm(0, 0.01)
-#'  alpha.s ~ dnorm(0, 0.01)
-#'  alpha.b ~ dnorm(0, 0.01)
-#'  alpha.u ~ dnorm(0, 0.01)
-#'  alpha.v ~ dnorm(0, 0.01)
-#'  }"
-#'  return(string2)
-#'}
+#' \preformatted{prior.study <- function(prior.type = "custom") {
+#' string2 <- "n ~ dnorm(0, 0.01) 
+#'   a ~ dnorm(0, 0.01) 
+#'   alpha.s ~ dnorm(0, 0.01) 
+#'   alpha.b ~ dnorm(0, 0.01) 
+#'   alpha.u ~ dnorm(0, 0.01) 
+#'   alpha.v ~ dnorm(0, 0.01)"
+#' return(string2)}
+#' }
 #' By default, the function \code{cace.study()} returns a list  
 #' including posterior estimates (posterior mean, standard deviation, median, and a 95\% 
 #' credible interval (CI) with 2.5\% and 97.5\% quantiles as the lower and upper bounds), 
 #' and the deviance information criterion (DIC) statistic for each study.
+#' 
 #' @examples
+#' \dontrun{
 #' data("epidural_c", package = "BayesCACE")
 #' set.seed(123)
 #' out.study <- cace.study(data = epidural_c, conv.diag = TRUE, 
-#'                            +   mcmc.samples = TRUE, two.step = TRUE)
-#' @seealso \code{\link{cace.meta.c}}, \code{\link{cace.meta.ic}}
-#' @references Zhou, J., Lin, L, Hodges, J. S., & Chu, H. (2020+). Estimating Causal Effect 
-#' using the Bayesian Method in a Single Study or Meta-Analysis with the R Package BayesCACE.
-#' Submitted to *Journal of Statisticial Software*.
+#' mcmc.samples = TRUE, two.step = TRUE) 
+#' # Show the estimates of \theta^{CACE} for each single study (posterior mean and 
+#' # standard deviation, posterior median, 95% credible interval, and time-series 
+#' # standard error):
+#' out.study$CACE
+#' # If the argument conv.diag is specified as `TRUE`, the output list contains 
+#' # a sub-list conv.out, which outputs the Gelman and Rubin convergence statistic,
+#' labelled Point est.) calculated for each parameter from each single study, and 
+#' their upper confidence limits (labelled Upper C.I.).
+#' out.study$conv.out[[1]]
+#' }
+#' @seealso \code{\link[BayesCACE]{cace.meta.c}}, \code{\link[BayesCACE]{cace.meta.ic}}
+#' @references {
+#' \insertRef{zhou2020software}{BayesCACE}
+#' } 
 #' 
 cace.study <-
   function(data, param = c("CACE", "u1", "v1", "s1", "b1", "pi.c", "pi.n", 
