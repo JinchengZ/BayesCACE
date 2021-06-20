@@ -1,0 +1,153 @@
+---
+title: "Sample R Code for the "
+author: "Jincheng Zhou"
+date: "6/20/2021"
+output: html_document
+bibliography: references.bib 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## 1. Install the R package and view the datasets
+
+The R package `BayesCACE` provides user-friendly functions to estimate CACE in either a single study or meta-analysis using the Baysian methods. The R package source files are available at GitHub: <https://github.com/JinchengZ/BayesCACE>.
+he `BayesCACE` package depends on the R packages `rjags` @plummer2013rjags, `coda` @plummer2006coda, and `forestplot` @max2017forestplot.
+
+First, installing the BayeCACE R package using the following R code: 
+```{r}
+## R package BayeCACE installation 
+library(devtools)
+Sys.setenv("TAR" = "internal")
+devtools::install_github("JinchengZ/BayesCACE")
+```
+
+Next, open the package in your R environment and view the default datasets. The one with complete data (10 studies in total) is called `epidural_c`. The other one that also include incomplete compliance data (27 studies in total) is named as `epidural_ic`. These two data sets were obtained from @RN240, who conducted an exploratory meta-analysis of the association between using epidural analgesia in labor and the risk of cesarean section.
+
+```{r}
+library("BayesCACE")
+```
+The dataset `epidural_c` contains 10 trials with full compliance information; each trial has 8 observed counts, denoted by $N_{irto}$ and presented in columns `Nirto` for $i=1, \dots, 10$ and $r, t, o \in \{0, 1\}$. 
+`study.id` contains IDs for the 10 studies, and `study.name` labels each study by its first author's surname and its publication year.
+```{r}
+data("epidural_c", package = "BayesCACE")
+epidural_c
+```
+The other dataset, `epidural_ic`, represents the situation in which not all trials report complete compliance data. It contains 27 studies, only 10 out of which have full compliance information and were included in `epidural_c`.
+Each study is represented by one row in the dataset; the columns `study.id` and `study.name` have the same meanings as in the dataset `epidural_c`. Each study's data are summarized in 12 numbers (columns) denoted by $N_{irto}$ and $N_{ir*o}$. For a particular randomization group $r \in \{0, 1\}$, the observed counts are presented either as $N_{irto}$ or $N_{ir*o}$ depending on whether the compliance information is available; values for other columns are denoted by 0.  The corresponding column names in the dataset are `Nirto` and `Nirso`, respectively. 
+```{r}
+data("epidural_ic", package = "BayesCACE")
+head(epidural_ic)
+```
+Note that `NA` is not allowed in a dataset for the package `BayesCACE`, but some trials may have 0 events or 0 noncompliance rates. 
+
+Before performing the CACE analysis, one might want a visual overview of study-specific noncompliance rates in both randomization arms. The function `plot.noncomp` provides a forest plot of noncompliance rates in an **R** plot window. 
+
+```{r}
+plot.noncomp(data = epidural_c, overall = TRUE)
+```
+The red dot with its horizontal line shows the study-specific noncompliance rate with its 95% exact confidence interval for the patients randomized to the treatment arm, and the blue square with its horizontal line represents that rate and interval for those in the control arm. 
+The confidence intervals are calculated by the Clopper--Pearson exact method \citep{RN282}, which is based on the cumulative distribution function of the binomial distribution. Using the default `overall = TRUE`, the figure also gives a summary estimate of the compliance rates per randomization group. This overall rate is estimated using a logit generalized linear mixed model. Otherwise, if the argument `overall` is `FALSE`, the plot shows only study-specific noncompliance rates. 
+
+## 2. CACE for a single trial with noncompliance
+
+To estimate CACE for a single study, users need to input data with the same structure as `epidural_c`, containing either one row of observations for a single study, or multiple rows referring to multiple studies in a meta-analysis. This function fits a model for a single study. If the data includes more than one study, the study-specific CACEs will be estimated by retrieving data row by row. 
+
+If users do not specify their own prior distributions, the default priors are used.
+
+```{r}
+set.seed(123)
+out.study <- cace.study(data = epidural_c, conv.diag = TRUE, mcmc.samples = 
+                          +   TRUE, two.step = TRUE)
+```
+If the dataset contains more than one study, e.g., the `epidural_c` dataset has 10 trials, then once the JAGS model compiles for the first study, it automatically continues to run on the next study's data. The results are saved in the object `out.study`, a list containing the model name, posterior information for each monitored parameter, and DIC of each study. 
+
+For example, the estimates of $\theta^\text{CACE}$ for each single study (posterior mean and standard deviation, posterior median, 95\% credible interval, and time-series standard error) can be obtained by 
+```{r}
+out.study$CACE
+```
+If the argument `conv.diag` is specified as *TRUE*, the output list contains a sub-list `conv.out`, which outputs the point estimates of the 'potential scale reduction factor' (the Gelman and Rubin convergence statistic, labelled `Point est.`) calculated for each parameter from each single study, and their upper confidence limits (labelled `Upper C.I.`).
+
+For example, the first sub-list from `conv.out` is 
+```{r}
+out.study$conv.out[[1]]
+```
+
+If the dataset used by the function `cace.study()` has more than one study, specifying the argument `two.step = TRUE` causes the two-step meta-analysis for $\theta^\text{CACE}$ to be done. The outcomes are saved as a sub-list object `meta`. Note that users can obtain different meta-analysis estimators by changing the `method` argument in `cace.study()`. 
+```{r}
+out.study$meta
+```
+
+
+## 3. CACE for a meta-analysis with complete compliance information
+
+The function `cace.meta.c()` performs the Bayesian hierarchical model method for meta-analysis when the dataset has complete compliance information for all studies. 
+```{r}
+set.seed(123)
+out.meta.c <- cace.meta.c(data = epidural_c, conv.diag = TRUE, mcmc.samples= TRUE, study.specific = TRUE)
+```
+In this example, by calling the object `smry` from the output list `out.meta.c`, posterior estimates (posterior mean, standard deviation, posterior median, 95% credible interval, and time-series standard error) are displayed. 
+```{r}
+out.meta.c$smry
+```
+Users can manually do model selection procedures by including different random effects and comparing DIC from the outputs. DIC and its two components are saved as an object `DIC` in the output list. 
+```{r}
+out.meta.c$DIC
+```
+
+
+## 4. CACE for meta-analysis with incomplete compliance information
+The function `out.meta.ic()` also estimates $\theta^\text{CACE}$ using the Bayesian hierarchcal model but can accommodate studies with incomplete compliance data. 
+```{r}
+set.seed(123)
+out.meta.ic <- cace.meta.ic(data = epidural_ic, conv.diag = TRUE, 
+                            mcmc.samples = TRUE, study.specific = TRUE)
+```
+The results are saved in the object `out.meta.ic`, a list containing posterior estimates for monitored parameters, DIC, convergence diagnostic statistics, and MCMC samples. 
+In this example, the argument `study.specific` is *TRUE*, so the summary for each study-specific $\theta^\text{CACE}_i$ is displayed in the object `out.meta.ic$smry` together with other parameters. 
+```{r}
+out.meta.ic$smry
+```
+    
+Note that when compiling the JAGS model, the warning "adaptation incomplete" may occasionally occur, indicating that the number of iterations for the adaptation process is not sufficient. The default value of `n.adapt` (the number of iterations for adaptation) is 1,000. This is an initial sampling phase during which the samplers adapt their behavior to maximize their efficiency (e.g., a Metropolis--Hastings random walk algorithm may change its step size) @plummer2013rjags. The "adaptation incomplete" warning indicates the MCMC algorithm may not achieve maximum efficiency, but it generally has little impact on the posterior estimates of the treatment effects. To avoid this warning, users may increase `n.adapt`.
+
+## 5. Functions for plots
+### 5-1. Diagnostic plots
+The function `plot.cacebaes()` provides diagnostic plots for the MCMC, namely trace plots, auto-correlation plots and kernel density estimation plots. Both trace plots and auto-correlation plots can be used to examine whether the MCMC chains appear to be drawn from stationary distributions. A posterior density plot for a parameter visually shows the posterior distribution. Users can simply call this function on objects produced by `cace.study()`, `cace.meta.c()`, or `cace.meta.ic()`.
+In the example below we use the objects list obtained from fitting the Bayesian hierarchical model `cace.meta.ic()` to generate the three plots. To avoid lengthy output we just illustrate how these plots are produced for $\theta^\text{CACE}$. 
+```{r}
+plot.cacebayes(obj = out.meta.ic)
+```
+The trace plots show the parameter values sampled at each iteration versus the iteration number. Each chain is drawn as a separate trace plot to avoid overlay. Here we used the default `n.chains = 3`, so three trace plots are drawn. These plots show evidence that the posterior samples of $\theta^\text{CACE}$ are drawn from the stationary distribution.
+
+The density plot is smoothed using the R function `density()`. It shows that the kernel-smoothed posterior of $\theta^\text{CACE}$ is almost symmetric. The posterior mean is not far from 0, indicating that the complier average causal effect of using epidural analgesia in labor on cesarean section is likely not significant. 
+
+The auto-correlation plot is a bar plot displaying the auto-correlation for different lags. 
+At lag 0, the value of the chain has perfect auto-correlation with itself. As the lag becomes greater, the values become less correlated. After a lag of about 50, the auto-correlation drops below 0.1.
+If the plot shows high auto-correlation, users can run the chain longer or can choose a larger `n.thin`, e.g., `n.thin = 10` would keep only 1 out of every 10 iterations, so that the thinned out chain is expected to have the auto-correlation dropping quickly.   
+
+### 5-2. Study-specific CACE in a forest plot
+A graphical overview of the results can be obtained by creating a forest plot @lewis2001forest. The function `plot.forest()` draws a forest plot for $\theta^{\text{CACE}}$ estimated from the meta-analysis. 
+Users can call this function for the objects from `cace.meta.c()` or `cace.meta.ic()`.
+Here is an example using the object `out.meta.ic`:
+```{r}
+plot.forest(data = epidural_ic, obj = out.meta.ic)
+```
+It is a forest plot of $\theta^\text{CACE}_i$ for each study individually, using the Bayesian method with full random effects and default priors. 
+The summary estimate based on the model `cace.meta.ic()` is automatically added to the figure, with the outer edges of the polygon indicating the confidence interval limits. 
+The 95% credible interval of the summary $\theta^{\text{CACE}}$ covers zero, indicating a non-significant complier average causal effect estimate for using epidural analgesia in labor on the risk of cesarean section for the meta-analysis with 27 trials. 
+For a study with incomplete data on compliance status, a dashed horizontal line in the forest plot is used to represent the posterior 95% credible interval of $\theta^\text{CACE}_i$ from the Bayesian hierarchical model fit. 
+The study-specific $\theta^{\text{CACE}}_i$ vary from negative to positive in individual studies, while most of the 95\% credible intervals cover zero. As the $\theta^\text{CACE}_i$ for a trial without complete compliance data is not estimable using only data from that single trial, dashed lines tend to have longer credible intervals than those with complete data (solid lines). 
+
+
+```{r}
+plot.forest(data = epidural_c, obj = out.study, obj2 = out.meta.c)
+```
+The function `cace.study()` can estimate CACE separately for an individual trial as long as it has complete compliance data. In that case, users can choose to generate a forest plot $\theta^\text{CACE}_i$ for each individual study based on separate analyses.
+The pooled estimate of $\theta^\text{CACE}$ and its 95% credible interval or confidence interval (the diamond in the plot) can be either from the Bayesian hierarchical model (the `cace.meta.c()` function) or from the two-step approach `cace.study()` function with the argument `two.step = TRUE`. The above code is an example of how to create such a plot. 
+If `obj` contains the two-step meta-analysis result, the argument `obj2` is optional and is included if users want to report the summary CACE estimate based on the Bayesian hierarchical model `cace.meta.ic()`. 
+
+
+## References
