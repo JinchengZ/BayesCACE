@@ -1,5 +1,5 @@
 ---
-title: "Sample R Code for the "
+title: "Sample R Code for the BayesCACE Package"
 author: "Jincheng Zhou"
 date: "6/20/2021"
 output: html_document

@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/783675/1487c2f52d924674bf3ff317bf499689
+bundleId: https://api.rpubs.com/api/v1/document/783675/1487c2f52d924674bf3ff317bf499689
+url: http://rpubs.com/zhoujjcc/783675
+when: 1624233793.22111
+lastSyncTime: 1624233793.22111
